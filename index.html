@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Excel Data Validator</title>
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Excel Data Validator</h1>
+
+      <div class="upload-section">
+        <div class="file-input-div">
+          <label for="fileInputCustomer">Upload Customer Excel File:</label>
+          <input type="file" id="fileInputCustomer" accept=".xls,.xlsx" />
+        </div>
+        <div class="file-input-div">
+          <label for="fileInputOwn">Upload Your Excel File:</label>
+          <input type="file" id="fileInputOwn" accept=".xls,.xlsx" />
+        </div>
+      </div>
+
+      <div class="download-section">
+        <button id="downloadJsonButton">Download JSON Files</button>
+        <button id="downloadExcelButton">Download Excel Files</button>
+        <button id="analyzeButton">Analyze</button>
+        <button id="downloadResultButton">Download Result</button>
+      </div>
+      <div class="display-area">
+        <!-- Comparison results will be displayed here -->
+      </div>
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>

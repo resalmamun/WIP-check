@@ -1,0 +1,156 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: rgb(17, 1, 1);
+  color: #333;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.container {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(175, 103, 103, 0.1);
+  width: 100%; /* Adjust width as needed */
+  max-width: 1200px;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.upload-section {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+}
+
+.file-input-div {
+  margin-bottom: 10px;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+input[type='file'] {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  width: calc(100% - 22px);
+  box-sizing: border-box;
+}
+
+button {
+  background-color: #5cb85c;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-right: 10px;
+}
+
+button:hover {
+  background-color: #4cae4c;
+}
+
+.display-area {
+  margin: 0;
+  padding: 0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #f9f9f9;
+  overflow-x: auto; /* Add horizontal scrolling if table is too wide */
+}
+
+/* Additional styles for better visualization of the errors */
+.mismatch {
+  background-color: #ffcccc;
+}
+
+.match {
+  background-color: #ccffcc;
+}
+
+.error-message {
+  color: red;
+  margin-top: 5px;
+  font-style: italic;
+}
+
+.download-section {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+/* Styles for the comparison table */
+.comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.comparison-table th,
+.comparison-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.comparison-table th {
+  background-color: #f2f2f2;
+}
+
+/* Style for mismatch cells */
+.mismatch-cell {
+  background-color: #ffcccc;
+}
+.mismatch-highlight {
+  background-color: #ffcccc; /* Light red background */
+  /* Add any other styles you want for mismatched cells */
+}
+
+/* Style for the message container */
+#message-container {
+  text-align: center;
+  font-size: 18px;
+  padding: 20px;
+  margin-top: 20px;
+  border: 1px solid #ccc; /* Optional border */
+  border-radius: 5px; /* Optional rounded corners */
+}
+
+/* Animation for the message */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.show-message {
+  animation: fadeIn 1s ease-in-out; /* 1s duration, ease-in-out timing */
+}
+
+/* Style for mismatched cells (from before) */
+.mismatch-highlight {
+  background-color: #ffcccc; /* Light red background */
+}
+
+#timer-display {
+  font-size: 18px;
+  margin-bottom: 10px; /* Add some spacing */
+}
