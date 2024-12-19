@@ -44,7 +44,6 @@ function parseExcelToJson(file, fileType) {
         } else if (fileType === 'own') {
           const po = obj['Po'] || ''
           const line = obj['line'] || ''
-          console.log('PO value:', po, 'Line value:', line) // Log values before concatenation
           obj['PO-Line'] = po && line ? `${po}-${line}` : ''
         }
         return obj
@@ -182,7 +181,7 @@ analyzeButton.addEventListener('click', () => {
   // --- Create Alphabetical Header Row ---
   const alphabetHeaderRow = document.createElement('tr')
   const customerHeadersCount = Object.keys(customerData[0]).length
-  const totalHeadersCount = customerHeadersCount + 1 + 5 + 1 // +1 for 'Match Status', +5 for added headers, +1 for Serial Number
+  const totalHeadersCount = customerHeadersCount + 1 + 5 + 1 + 1 // +1 for 'Match Status', +5 for added headers, +1 for Serial Number, +1 for "Enter user"
 
   // Add empty cell for the serial number column in the alphabetical header row
   alphabetHeaderRow.appendChild(document.createElement('th'))
@@ -225,6 +224,11 @@ analyzeButton.addEventListener('click', () => {
     th.textContent = header
     headerRow.appendChild(th)
   })
+
+  // Add header for the "Enter user" column
+  const enterUserHeader = document.createElement('th')
+  enterUserHeader.textContent = 'Enter user'
+  headerRow.appendChild(enterUserHeader)
 
   thead.appendChild(headerRow)
   // --- End of Original Header Row ---
@@ -291,56 +295,49 @@ analyzeButton.addEventListener('click', () => {
       styledRow[header] = ownValue
     })
 
+    // Add "Enter user" cell
+    const enterUserCell = document.createElement('td')
+    let enterUserValue = ''
+    for (const ownRow of ownData) {
+      if (ownRow['Po'] === customerRow['Document Number']) {
+        enterUserValue = ownRow['Enter user'] || ''
+        break
+      }
+    }
+    enterUserCell.textContent = enterUserValue
+    tr.appendChild(enterUserCell)
+    styledRow['Enter user'] = enterUserValue
+
     tbody.appendChild(tr)
     styledData.push(styledRow)
   })
 
   table.appendChild(tbody)
-  // --- Analyze Column W and N ---
-  const columnNIndex = Object.keys(styledData[0]).indexOf(
-    Object.keys(customerData[0])[12]
-  ) // Assuming N is the 14th column (index 13) in customerData, so find the index of 13th element in styledData
-  const columnWIndex = Object.keys(styledData[0]).indexOf(ownHeaders[4]) // Assuming W is the last column (index 22)
 
+  // --- Secondary Check for "No Match" Rows ---
   for (let i = 0; i < styledData.length; i++) {
-    const rowData = styledData[i]
-    const columnWValue = rowData[Object.keys(rowData)[columnWIndex]] || ''
-    const columnNValue = rowData[Object.keys(rowData)[columnNIndex]] || ''
+    if (styledData[i]['Match Status'] === 'No Match') {
+      const docNumFull = styledData[i]['Document Number'] || ''
+      const docNumBeforeHyphen = docNumFull.split('-')[0] // Extract before hyphen
 
-    if (columnWValue !== columnNValue) {
-      // Highlight the cells in the table
-      const rowIndex = i + 2 // +2 to account for the two header rows
-      const tableRow = table.querySelector(`tbody tr:nth-child(${rowIndex})`)
-      if (tableRow) {
-        const cellW = tableRow.querySelector(
-          `td:nth-child(${columnWIndex + 2})`
-        )
-        const cellN = tableRow.querySelector(
-          `td:nth-child(${columnNIndex + 2})`
-        )
-
-        if (cellW && cellN) {
-          cellW.classList.add('mismatch-highlight')
-          cellN.classList.add('mismatch-highlight')
-        } else {
-          console.error('Could not find cellW or cellN', cellW, cellN)
+      for (let j = 0; j < ownData.length; j++) {
+        if (ownData[j]['Po'] === docNumBeforeHyphen) {
+          // Update Match Status in table and styledData
+          const rowIndex = i + 2 // +2 for header rows
+          const tableRow = table.querySelector(
+            `tbody tr:nth-child(${rowIndex})`
+          )
+          const statusCell = tableRow.querySelector('td:nth-child(8)') // Assuming "Match Status" is the 8th column
+          statusCell.textContent = 'Match (without hyphen)'
+          statusCell.classList.remove('mismatch')
+          statusCell.classList.add('match')
+          styledData[i]['Match Status'] = 'Match (without hyphen)'
+          break // Exit inner loop after finding a match
         }
-      } else {
-        console.error('Could not find tableRow for rowIndex:', rowIndex)
-      }
-
-      // Highlight the cells in styled data
-      styledData[i][Object.keys(rowData)[columnWIndex]] = {
-        value: columnWValue,
-        style: { fill: { fgColor: { rgb: 'FFCCCC' } } },
-      }
-      styledData[i][Object.keys(rowData)[columnNIndex]] = {
-        value: columnNValue,
-        style: { fill: { fgColor: { rgb: 'FFCCCC' } } },
       }
     }
   }
-  // --- End of Column W and N Analysis ---
+  // --- End of Secondary Check ---
 
   // --- Hide table and display message ---
   // Append the table to the display area
@@ -422,37 +419,6 @@ function downloadExcelWithHighlight(jsonData, filename) {
 
   // Convert JSON to sheet
   const worksheet = XLSX.utils.json_to_sheet(jsonData)
-
-  // Apply highlighting
-  const range = XLSX.utils.decode_range(worksheet['!ref'])
-  for (let R = range.s.r; R <= range.e.r; ++R) {
-    for (let C = range.s.c; C <= range.e.c; ++C) {
-      const cellAddress = XLSX.utils.encode_cell({ r: R, c: C })
-      const cell = worksheet[cellAddress]
-      if (
-        cell &&
-        jsonData[R - 1] &&
-        jsonData[R - 1][Object.keys(jsonData[R - 1])[C]]
-      ) {
-        const header = Object.keys(jsonData[R - 1])[C]
-        const customerValue = jsonData[R - 1][header] || ''
-        const ownValue = jsonData[R - 1][header] || ''
-
-        // Check if the cell has highlighting from styledData
-        if (
-          jsonData[R - 1][header] &&
-          typeof jsonData[R - 1][header] === 'object' &&
-          jsonData[R - 1][header].style
-        ) {
-          worksheet[cellAddress].s = jsonData[R - 1][header].style
-        }
-
-        if (header != 'Match Status' && customerValue != ownValue) {
-          worksheet[cellAddress].s = { fill: { fgColor: { rgb: 'FFCCCC' } } }
-        }
-      }
-    }
-  }
 
   // Append the sheet to the workbook
   XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1')
